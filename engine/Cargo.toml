@@ -1,0 +1,21 @@
+[package]
+name = "typemaster-engine"
+description = "Pure-logic engine for TypeMaster: metrics, session state, adaptive SM-2, corpus."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "engine"
+path = "src/lib.rs"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+unicode-segmentation.workspace = true
+rust-embed = "=8.7.2"
+rand = "=0.8.5"

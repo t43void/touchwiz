@@ -1,0 +1,6 @@
+# No-install fallback for the justfile recipes, since `just` may be absent.
+# Usage: `cargo t`, `cargo lint`, `cargo fmtcheck`.
+[alias]
+t = "test"
+lint = "clippy --all-targets -- -D warnings"
+fmtcheck = "fmt --all --check"

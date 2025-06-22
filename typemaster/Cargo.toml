@@ -1,0 +1,25 @@
+[package]
+name = "typemaster"
+description = "TypeMaster — a terminal-first, open-source typing trainer."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "typemaster"
+path = "src/main.rs"
+
+[dependencies]
+engine = { package = "typemaster-engine", path = "../engine" }
+serde.workspace = true
+serde_json.workspace = true
+ratatui = "=0.29.0"
+crossterm = "=0.29.0"
+tokio = { version = "=1.47.1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+rusqlite = { version = "=0.37.0", features = ["bundled"] }
+clap = { version = "=4.5.43", features = ["derive"] }
+clap_mangen = "=0.2.29"
+directories-next = "=2.0.0"

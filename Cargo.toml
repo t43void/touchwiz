@@ -1,0 +1,23 @@
+[workspace]
+resolver = "2"
+members = ["engine", "typemaster"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["th3void"]
+repository = "https://github.com/t43void/touchwiz"
+rust-version = "1.88"
+
+[workspace.dependencies]
+serde = { version = "=1.0.219", features = ["derive", "rc"] }
+serde_json = "=1.0.142"
+thiserror = "=2.0.12"
+unicode-segmentation = "=1.12.0"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
