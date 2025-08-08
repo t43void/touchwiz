@@ -1,0 +1,59 @@
+{
+  "name": "@typemaster/content",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Build/dev-time content authoring and validation for TypeMaster. Corpora here are embedded into the Rust binary at compile time; this layer is never required at runtime.",
+  "type": "module",
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": "24.5.x",
+    "pnpm": "10.14.x"
+  },
+  "bin": {
+    "typemaster-content": "src/cli.ts"
+  },
+  "scripts": {
+    "validate": "node src/cli.ts validate",
+    "list": "node src/cli.ts list",
+    "watch": "node src/cli.ts watch",
+    "test": "node --test",
+    "build": "tsup src/cli.ts --format esm --clean"
+  },
+  "devDependencies": {
+    "tsup": "8.5.0",
+    "typescript": "5.9.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "0.25.8",
+      "@jridgewell/gen-mapping": "0.3.12",
+      "@jridgewell/sourcemap-codec": "1.5.4",
+      "@jridgewell/trace-mapping": "0.3.29",
+      "rollup": "4.46.2",
+      "@types/estree": "1.0.8",
+      "acorn": "8.15.0",
+      "debug": "4.4.1",
+      "fdir": "6.4.6",
+      "magic-string": "0.30.17",
+      "mlly": "1.7.4",
+      "picomatch": "4.0.3",
+      "sucrase": "3.35.0",
+      "tinyglobby": "0.2.14",
+      "ufo": "1.6.1",
+      "ansi-regex": "6.1.0",
+      "ansi-styles": "6.2.1",
+      "brace-expansion": "2.0.2",
+      "glob": "10.4.5",
+      "minimatch": "9.0.5",
+      "minipass": "7.1.2",
+      "strip-ansi": "7.1.0"
+    }
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.5.0",
+      "onFail": "download"
+    }
+  }
+}
