@@ -1,0 +1,17 @@
+{
+  "name": "quotes",
+  "language": "en",
+  "kind": "sentences",
+  "entries": [
+    "the quick brown fox jumps over the lazy dog",
+    "practice does not make perfect only perfect practice makes perfect",
+    "the best way to predict the future is to invent it",
+    "simplicity is the ultimate sophistication",
+    "what we know is a drop what we do not know is an ocean",
+    "the only way to do great work is to love what you do",
+    "first solve the problem then write the code",
+    "talk is cheap show me the code",
+    "make it work make it right make it fast",
+    "the journey of a thousand miles begins with a single step"
+  ]
+}

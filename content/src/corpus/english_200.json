@@ -1,0 +1,28 @@
+{
+  "name": "english_200",
+  "language": "en",
+  "kind": "words",
+  "entries": [
+    "the", "be", "to", "of", "and", "a", "in", "that", "have", "i",
+    "it", "for", "not", "on", "with", "he", "as", "you", "do", "at",
+    "this", "but", "his", "by", "from", "they", "we", "say", "her", "she",
+    "or", "an", "will", "my", "one", "all", "would", "there", "their", "what",
+    "so", "up", "out", "if", "about", "who", "get", "which", "go", "me",
+    "when", "make", "can", "like", "time", "no", "just", "him", "know", "take",
+    "people", "into", "year", "your", "good", "some", "could", "them", "see", "other",
+    "than", "then", "now", "look", "only", "come", "its", "over", "think", "also",
+    "back", "after", "use", "two", "how", "our", "work", "first", "well", "way",
+    "even", "new", "want", "because", "any", "these", "give", "day", "most", "us",
+    "is", "was", "are", "been", "has", "had", "were", "said", "did", "made",
+    "find", "here", "thing", "great", "man", "world", "life", "still", "hand", "high",
+    "old", "long", "down", "off", "few", "such", "place", "case", "part", "right",
+    "where", "much", "before", "move", "too", "same", "tell", "does", "set", "three",
+    "must", "every", "large", "big", "group", "begin", "seem", "country", "help", "talk",
+    "turn", "start", "might", "show", "hear", "play", "run", "small", "number", "again",
+    "point", "home", "water", "room", "write", "mother", "area", "money", "story", "young",
+    "fact", "month", "different", "lot", "study", "book", "word", "though", "business", "issue",
+    "side", "kind", "head", "house", "service", "friend", "father", "power", "hour", "game",
+    "line", "end", "member", "law", "car", "city", "name", "team", "minute", "idea",
+    "quick", "quite", "question", "size", "realize", "amazing", "prize", "zone", "buzz", "lazy"
+  ]
+}

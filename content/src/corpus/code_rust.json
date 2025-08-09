@@ -1,0 +1,27 @@
+{
+  "name": "code_rust",
+  "language": "en",
+  "kind": "code",
+  "entries": [
+    "let mut sum = 0;",
+    "fn main() {}",
+    "for i in 0..n { sum += i; }",
+    "let v: Vec<i32> = Vec::new();",
+    "match x { Some(y) => y, None => 0 }",
+    "if a == b { return true; }",
+    "use std::collections::HashMap;",
+    "let map = HashMap::new();",
+    "struct Point { x: f64, y: f64 }",
+    "impl Point { fn norm(&self) -> f64 {} }",
+    "let s = String::from(\"hello\");",
+    "while i < len { i += 1; }",
+    "fn add(a: i32, b: i32) -> i32 { a + b }",
+    "let opt = value.unwrap_or(0);",
+    "vec.iter().map(|x| x * 2).collect();",
+    "return Err(Error::NotFound);",
+    "pub fn run() -> Result<()> { Ok(()) }",
+    "let (a, b) = (1, 2);",
+    "self.count += 1;",
+    "let arr = [0u8; 16];"
+  ]
+}
