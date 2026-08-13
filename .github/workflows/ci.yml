@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
 
 env:
@@ -41,23 +42,66 @@ jobs:
       - name: Test
         run: node --test
 
-  release:
-    name: Release binaries
+  build-release:
+    name: Build ${{ matrix.target }}
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [rust, content]
-    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive: typemaster-x86_64-unknown-linux-gnu.tar.gz
+          - os: macos-13
+            target: x86_64-apple-darwin
+            archive: typemaster-x86_64-apple-darwin.tar.gz
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            archive: typemaster-aarch64-apple-darwin.tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive: typemaster-x86_64-pc-windows-msvc.zip
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Build release
         run: cargo build --release -p typemaster
+      - name: Package (unix)
+        if: runner.os != 'Windows'
+        run: |
+          cp target/release/typemaster .
+          tar -czf "${{ matrix.archive }}" typemaster
+      - name: Package (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Copy-Item target/release/typemaster.exe .
+          Compress-Archive -Path typemaster.exe -DestinationPath "${{ matrix.archive }}"
       - uses: actions/upload-artifact@v4
         with:
-          name: typemaster-${{ matrix.os }}
-          path: |
-            target/release/typemaster
-            target/release/typemaster.exe
-          if-no-files-found: ignore
+          name: release-${{ matrix.target }}
+          path: ${{ matrix.archive }}
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: dist
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

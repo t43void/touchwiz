@@ -5,8 +5,9 @@
 //! unit (key, bigram, or word) is a [`Card`] whose `easiness_factor` and review
 //! `interval` adapt to measured latency and error rate.
 
-use rand::distributions::{Distribution, WeightedIndex};
-use rand::seq::SliceRandom;
+use rand::distr::weighted::WeightedIndex;
+use rand::distr::Distribution;
+use rand::seq::IndexedRandom;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 

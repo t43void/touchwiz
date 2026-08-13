@@ -13,8 +13,8 @@ pub mod intermediate;
 
 use std::collections::HashMap;
 
-use rand::seq::SliceRandom;
-use rand::Rng;
+use rand::seq::IndexedRandom;
+use rand::RngExt;
 use serde::{Deserialize, Serialize};
 
 use crate::adaptive;
@@ -134,7 +134,7 @@ pub enum Drill {
 
 impl Drill {
     /// Generates a target string for this drill using `rng`.
-    pub fn generate(&self, rng: &mut impl Rng) -> Result<String> {
+    pub fn generate(&self, rng: &mut impl RngExt) -> Result<String> {
         match self {
             Drill::KeySet {
                 alphabet,
@@ -180,7 +180,7 @@ fn gen_keyset(
     words: usize,
     min_len: usize,
     max_len: usize,
-    rng: &mut impl Rng,
+    rng: &mut impl RngExt,
 ) -> String {
     let chars: Vec<char> = alphabet.chars().filter(|c| !c.is_whitespace()).collect();
     if chars.is_empty() {
@@ -190,7 +190,7 @@ fn gen_keyset(
     let hi = max_len.max(lo);
     let mut out = Vec::with_capacity(words);
     for _ in 0..words {
-        let len = rng.gen_range(lo..=hi);
+        let len = rng.random_range(lo..=hi);
         let mut w = String::with_capacity(len);
         for _ in 0..len {
             if let Some(&c) = chars.choose(rng) {
@@ -202,7 +202,7 @@ fn gen_keyset(
     out.join(" ")
 }
 
-fn sample_join(items: &[String], count: usize, rng: &mut impl Rng) -> String {
+fn sample_join(items: &[String], count: usize, rng: &mut impl RngExt) -> String {
     if items.is_empty() {
         return String::new();
     }
@@ -212,25 +212,24 @@ fn sample_join(items: &[String], count: usize, rng: &mut impl Rng) -> String {
         .join(" ")
 }
 
-fn gen_numbers(groups: usize, rng: &mut impl Rng) -> String {
+fn gen_numbers(groups: usize, rng: &mut impl RngExt) -> String {
     (0..groups)
         .map(|_| {
-            let len = rng.gen_range(2..=5);
+            let len = rng.random_range(2..=5);
             (0..len)
-                .map(|_| char::from(b'0' + rng.gen_range(0..10)))
+                .map(|_| char::from(b'0' + rng.random_range(0..10)))
                 .collect::<String>()
         })
         .collect::<Vec<_>>()
         .join(" ")
 }
 
-fn gen_tech_tokens(count: usize, rng: &mut impl Rng) -> String {
-    let word = |rng: &mut dyn rand::RngCore| {
-        let mut r = rng;
-        TECH_WORDS.choose(&mut r).copied().unwrap_or("user")
-    };
+fn gen_tech_tokens(count: usize, rng: &mut impl RngExt) -> String {
+    fn word(rng: &mut impl RngExt) -> &'static str {
+        TECH_WORDS.choose(rng).copied().unwrap_or("user")
+    }
     (0..count)
-        .map(|_| match rng.gen_range(0..3) {
+        .map(|_| match rng.random_range(0..3) {
             0 => format!("{}@{}.com", word(rng), word(rng)),
             1 => format!("https://{}.com/{}", word(rng), word(rng)),
             _ => format!("/{}/{}.rs", word(rng), word(rng)),
@@ -266,13 +265,13 @@ pub struct Lesson {
 
 impl Lesson {
     /// Generates this lesson's practice text.
-    pub fn generate(&self, rng: &mut impl Rng) -> Result<String> {
+    pub fn generate(&self, rng: &mut impl RngExt) -> Result<String> {
         self.content.generate(rng)
     }
 
     /// Generates this lesson's practice text using the thread RNG.
     pub fn generate_default(&self) -> Result<String> {
-        self.content.generate(&mut rand::thread_rng())
+        self.content.generate(&mut rand::rng())
     }
 
     /// A custom lesson built from imported text (no pass gating).

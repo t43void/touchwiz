@@ -2,7 +2,7 @@
 
 use engine::adaptive::PASSES_TO_UNLOCK;
 use engine::heatmap::Heatmap;
-use ratatui::layout::{Alignment, Constraint, Direction, Layout, Rect};
+use ratatui::layout::{Constraint, Direction, HorizontalAlignment, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
@@ -113,7 +113,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     frame.render_widget(
         Paragraph::new(vec![
             Line::from(""),
-            Line::from(bigram_spans).alignment(Alignment::Center),
+            Line::from(bigram_spans).alignment(HorizontalAlignment::Center),
         ]),
         rows[3],
     );
@@ -169,12 +169,12 @@ fn banner<'a>(app: &'a App, theme: &Theme) -> Paragraph<'a> {
             title,
             Style::default().fg(color).add_modifier(Modifier::BOLD),
         ))
-        .alignment(Alignment::Center),
+        .alignment(HorizontalAlignment::Center),
         Line::from(Span::styled(
             subtitle,
             Style::default().fg(theme.text_muted),
         ))
-        .alignment(Alignment::Center),
+        .alignment(HorizontalAlignment::Center),
     ])
 }
 

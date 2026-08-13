@@ -1,6 +1,6 @@
 //! Animated launch splash: the ASCII logo fades/reveals in, then auto-advances.
 
-use ratatui::layout::Alignment;
+use ratatui::layout::HorizontalAlignment;
 use ratatui::layout::Rect;
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
@@ -47,5 +47,8 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     )));
 
     let panel = centered(area, 40, lines.len() as u16);
-    frame.render_widget(Paragraph::new(lines).alignment(Alignment::Center), panel);
+    frame.render_widget(
+        Paragraph::new(lines).alignment(HorizontalAlignment::Center),
+        panel,
+    );
 }

@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use directories_next::ProjectDirs;
+use directories::ProjectDirs;
 
 /// The data directory, e.g. `$XDG_DATA_HOME/typemaster` on Linux.
 ///

@@ -1,6 +1,6 @@
 //! Home screen: centered title, headline stats, today's streak, and the menu.
 
-use ratatui::layout::{Alignment, Constraint, Direction, Layout, Rect};
+use ratatui::layout::{Constraint, Direction, HorizontalAlignment, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
@@ -39,7 +39,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App, _now_ms: u64) {
                 Style::default().fg(theme.text_muted),
             )),
         ])
-        .alignment(Alignment::Center),
+        .alignment(HorizontalAlignment::Center),
         chunks[0],
     );
 

@@ -2,7 +2,7 @@
 //! optional keyboard visualization, and a footer hint.
 
 use engine::metrics::{finger_for, Finger};
-use ratatui::layout::{Alignment, Constraint, Direction, Layout, Rect};
+use ratatui::layout::{Constraint, Direction, HorizontalAlignment, Layout, Rect};
 use ratatui::style::Style;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
@@ -62,7 +62,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App, now_ms: u64, blink_on: b
         " Esc: dashboard · Ctrl+R: restart · Ctrl+K: keyboard · Ctrl+F: fingers · Ctrl+G: ghost ",
         Style::default().fg(theme.text_muted),
     )]))
-    .alignment(Alignment::Center);
+    .alignment(HorizontalAlignment::Center);
     frame.render_widget(footer, chunks[idx]);
 }
 

@@ -11,10 +11,10 @@ repository = "https://github.com/t43void/touchwiz"
 rust-version = "1.88"
 
 [workspace.dependencies]
-serde = { version = "=1.0.219", features = ["derive", "rc"] }
-serde_json = "=1.0.142"
-thiserror = "=2.0.12"
-unicode-segmentation = "=1.12.0"
+serde = { version = "=1.0.229", features = ["derive", "rc"] }
+serde_json = "=1.0.151"
+thiserror = "=2.0.20"
+unicode-segmentation = "=1.13.3"
 
 [profile.release]
 lto = true

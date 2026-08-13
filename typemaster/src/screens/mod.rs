@@ -10,7 +10,7 @@ pub mod results;
 pub mod settings;
 pub mod splash;
 
-use ratatui::layout::{Alignment, Rect};
+use ratatui::layout::{HorizontalAlignment, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, Padding, Paragraph};
@@ -82,5 +82,5 @@ pub(crate) fn footer<'a>(theme: &Theme, items: &[&'a str]) -> Paragraph<'a> {
         }
         spans.push(Span::styled(*item, Style::default().fg(theme.text_muted)));
     }
-    Paragraph::new(Line::from(spans)).alignment(Alignment::Center)
+    Paragraph::new(Line::from(spans)).alignment(HorizontalAlignment::Center)
 }

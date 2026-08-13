@@ -12,8 +12,9 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use rand::distributions::{Distribution, WeightedIndex};
-use rand::seq::SliceRandom;
+use rand::distr::weighted::WeightedIndex;
+use rand::distr::Distribution;
+use rand::seq::IndexedRandom;
 use rand::Rng;
 use serde::Deserialize;
 
@@ -142,7 +143,7 @@ impl Corpus {
     /// Convenience wrapper over [`Corpus::build_text`] for callers that do not
     /// manage their own RNG (e.g. the binary).
     pub fn build_text_default(&self, word_count: usize) -> String {
-        self.build_text(word_count, &mut rand::thread_rng())
+        self.build_text(word_count, &mut rand::rng())
     }
 
     /// Builds a single typing target string of about `word_count` words.
