@@ -71,14 +71,16 @@ jobs:
       - name: Package (unix)
         if: runner.os != 'Windows'
         run: |
-          cp target/release/typemaster .
-          tar -czf "${{ matrix.archive }}" typemaster
+          mkdir -p dist
+          cp target/release/typemaster dist/typemaster
+          tar -C dist -czf "${{ matrix.archive }}" typemaster
       - name: Package (windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Copy-Item target/release/typemaster.exe .
-          Compress-Archive -Path typemaster.exe -DestinationPath "${{ matrix.archive }}"
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item target/release/typemaster.exe dist/typemaster.exe
+          Compress-Archive -Path dist/typemaster.exe -DestinationPath "${{ matrix.archive }}"
       - uses: actions/upload-artifact@v4
         with:
           name: release-${{ matrix.target }}
