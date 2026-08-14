@@ -1,4 +1,4 @@
-//! TypeMaster binary entry point: terminal lifecycle and the render/event loop.
+//! touchwiz binary entry point: terminal lifecycle and the render/event loop.
 
 mod app;
 mod components;
@@ -24,9 +24,9 @@ use ratatui::Terminal;
 use crate::app::{now_ms, App, KeyOutcome};
 use crate::db::{Db, SessionRecord};
 
-/// TypeMaster — a terminal-first typing trainer.
+/// touchwiz — a terminal-first typing trainer.
 #[derive(Debug, Parser)]
-#[command(name = "typemaster", version, about)]
+#[command(name = "touchwiz", version, about)]
 struct Cli {
     /// Train on a custom text or code file instead of the curriculum.
     #[arg(long, value_name = "PATH")]
@@ -70,7 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(path) => match Db::open(&path) {
             Ok(db) => Some(db),
             Err(e) => {
-                eprintln!("typemaster: persistence disabled ({e})");
+                eprintln!("touchwiz: persistence disabled ({e})");
                 None
             }
         },
@@ -151,13 +151,13 @@ fn run(
     Ok(())
 }
 
-/// Writes the clap-generated man page to `dir/typemaster.1`.
+/// Writes the clap-generated man page to `dir/touchwiz.1`.
 fn generate_man_page(dir: &std::path::Path) -> io::Result<()> {
     std::fs::create_dir_all(dir)?;
     let man = clap_mangen::Man::new(Cli::command());
     let mut buf = Vec::new();
     man.render(&mut buf)?;
-    let path = dir.join("typemaster.1");
+    let path = dir.join("touchwiz.1");
     std::fs::write(&path, buf)?;
     println!("wrote {}", path.display());
     Ok(())

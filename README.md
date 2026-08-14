@@ -1,4 +1,4 @@
-# TypeMaster
+# touchwiz
 
 Terminal typing trainer. One binary. Zero telemetry, zero network, zero
 nonsense.
@@ -12,13 +12,13 @@ Science-backed drills, not a flashy website pretending to care about your WPM.
 curl -sSL https://raw.githubusercontent.com/t43void/touchwiz/main/install.sh | bash
 ```
 
-Drops `typemaster` into `~/.local/bin`. Override with `PREFIX=/somewhere ./install.sh`.
+Drops `touchwiz` into `~/.local/bin`. Override with `PREFIX=/somewhere ./install.sh`.
 
 From source (Rust ≥ 1.88):
 
 ```sh
 cargo build --release
-./target/release/typemaster
+./target/release/touchwiz
 ```
 
 ## What you get

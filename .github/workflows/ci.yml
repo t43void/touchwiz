@@ -52,16 +52,13 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            archive: typemaster-x86_64-unknown-linux-gnu.tar.gz
-          - os: macos-13
-            target: x86_64-apple-darwin
-            archive: typemaster-x86_64-apple-darwin.tar.gz
+            archive: touchwiz-x86_64-unknown-linux-gnu.tar.gz
           - os: macos-latest
             target: aarch64-apple-darwin
-            archive: typemaster-aarch64-apple-darwin.tar.gz
+            archive: touchwiz-aarch64-apple-darwin.tar.gz
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            archive: typemaster-x86_64-pc-windows-msvc.zip
+            archive: touchwiz-x86_64-pc-windows-msvc.zip
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -72,15 +69,15 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           mkdir -p dist
-          cp target/release/typemaster dist/typemaster
-          tar -C dist -czf "${{ matrix.archive }}" typemaster
+          cp target/release/touchwiz dist/touchwiz
+          tar -C dist -czf "${{ matrix.archive }}" touchwiz
       - name: Package (windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item target/release/typemaster.exe dist/typemaster.exe
-          Compress-Archive -Path dist/typemaster.exe -DestinationPath "${{ matrix.archive }}"
+          Copy-Item target/release/touchwiz.exe dist/touchwiz.exe
+          Compress-Archive -Path dist/touchwiz.exe -DestinationPath "${{ matrix.archive }}"
       - uses: actions/upload-artifact@v4
         with:
           name: release-${{ matrix.target }}

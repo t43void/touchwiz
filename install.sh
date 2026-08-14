@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 #
-# TypeMaster installer — downloads the prebuilt binary for the current OS and
+# touchwiz installer — downloads the prebuilt binary for the current OS and
 # architecture from the latest GitHub release and installs it.
 #
 # Usage:
 #   curl -sSL https://raw.githubusercontent.com/t43void/touchwiz/main/install.sh | bash
-#   PREFIX=/opt/typemaster ./install.sh
+#   PREFIX=/opt/touchwiz ./install.sh
 #
 
 set -euo pipefail
 
 REPO="t43void/touchwiz"
 PREFIX="${PREFIX:-$HOME/.local/bin}"
-BIN_NAME="typemaster"
+BIN_NAME="touchwiz"
 
 die() {
   echo "error: $*" >&2
@@ -30,14 +30,13 @@ url_for_target() {
   case "$os" in
     linux)
       case "$arch" in
-        x86_64 | amd64) echo "typemaster-x86_64-unknown-linux-gnu.tar.gz" ;;
+        x86_64 | amd64) echo "touchwiz-x86_64-unknown-linux-gnu.tar.gz" ;;
         *) die "no prebuilt binary for linux/$arch; build from source (see README)" ;;
       esac
       ;;
     darwin)
       case "$arch" in
-        x86_64) echo "typemaster-x86_64-apple-darwin.tar.gz" ;;
-        arm64) echo "typemaster-aarch64-apple-darwin.tar.gz" ;;
+        arm64) echo "touchwiz-aarch64-apple-darwin.tar.gz" ;;
         *) die "no prebuilt binary for darwin/$arch; build from source (see README)" ;;
       esac
       ;;

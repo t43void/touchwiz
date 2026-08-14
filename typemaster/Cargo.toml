@@ -1,6 +1,6 @@
 [package]
 name = "typemaster"
-description = "TypeMaster — a terminal-first, open-source typing trainer."
+description = "touchwiz — a terminal-first, open-source typing trainer."
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -9,7 +9,7 @@ repository.workspace = true
 rust-version.workspace = true
 
 [[bin]]
-name = "typemaster"
+name = "touchwiz"
 path = "src/main.rs"
 
 [dependencies]
