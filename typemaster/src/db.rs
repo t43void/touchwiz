@@ -226,7 +226,7 @@ impl Db {
                 };
                 if let Err(e) = result {
                     // The render thread is gone by design; surface to stderr.
-                    eprintln!("typemaster: failed to persist: {e}");
+                    eprintln!("touchwiz: failed to persist: {e}");
                 }
             }
         });
