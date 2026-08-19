@@ -102,12 +102,13 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     if errored.is_empty() {
         bigram_spans.push(Span::styled("none — clean run!", value));
     } else {
-        for (i, (b, rate)) in errored.iter().enumerate() {
+        for (i, (b, errors, hits)) in errored.iter().enumerate() {
             if i > 0 {
                 bigram_spans.push(Span::styled("   ", muted));
             }
             bigram_spans.push(Span::styled(format!("{b} "), value));
-            bigram_spans.push(Span::styled(format!("{:.0}%", rate * 100.0), muted));
+            // Show errors/hits so one-off 100% misses aren't misleading.
+            bigram_spans.push(Span::styled(format!("{errors}/{hits}"), muted));
         }
     }
     frame.render_widget(

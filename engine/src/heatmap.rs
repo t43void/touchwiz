@@ -149,18 +149,23 @@ impl Heatmap {
         v
     }
 
-    /// The `n` most error-prone bigrams by error rate, descending. Bigrams with
-    /// no errors are excluded.
-    pub fn most_errored_bigrams(&self, n: usize) -> Vec<(String, f64)> {
-        let mut v: Vec<(String, f64)> = self
+    /// The `n` most error-prone bigrams, ranked by error count (then rate).
+    /// Returns `(bigram, errors, hits)` so the UI can show real counts instead
+    /// of noisy 100% rates from one-off misses.
+    pub fn most_errored_bigrams(&self, n: usize) -> Vec<(String, u32, u32)> {
+        let mut v: Vec<(String, u32, u32, f64)> = self
             .bigrams
             .iter()
             .filter(|(_, s)| s.errors > 0)
-            .map(|(b, s)| (b.clone(), s.error_rate()))
+            .map(|(b, s)| (b.clone(), s.errors, s.hits, s.error_rate()))
             .collect();
-        v.sort_by(|a, b| b.1.total_cmp(&a.1));
+        v.sort_by(|a, b| {
+            b.1.cmp(&a.1) // more errors first
+                .then_with(|| b.3.total_cmp(&a.3)) // then higher rate
+                .then_with(|| b.2.cmp(&a.2)) // then more samples
+        });
         v.truncate(n);
-        v
+        v.into_iter().map(|(b, e, h, _)| (b, e, h)).collect()
     }
 }
 
@@ -220,8 +225,14 @@ mod tests {
         let mut h = Heatmap::new();
         h.record_bigram("th", true, 100.0);
         h.record_bigram("he", false, 100.0);
+        h.record_bigram("an", false, 100.0);
+        h.record_bigram("an", false, 100.0);
         let errored = h.most_errored_bigrams(5);
-        assert_eq!(errored.len(), 1);
-        assert_eq!(errored[0].0, "he");
+        assert_eq!(errored.len(), 2);
+        // "an" has 2 errors, ranks above "he" with 1.
+        assert_eq!(errored[0].0, "an");
+        assert_eq!(errored[0].1, 2);
+        assert_eq!(errored[1].0, "he");
+        assert_eq!(errored[1].1, 1);
     }
 }
