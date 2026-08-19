@@ -81,10 +81,10 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     ]);
     frame.render_widget(metrics, cols[0]);
 
-    let hm = Heatmap::from_session(session);
+    let insights = app.insights();
     let mut key_lines = vec![Line::from(Span::styled("Slowest keys", muted))];
-    for (k, ms) in hm.slowest_keys(5) {
-        let shown = if k == ' ' {
+    for (k, ms) in &insights.slowest_keys {
+        let shown = if *k == ' ' {
             "spc".to_string()
         } else {
             k.to_string()
@@ -96,18 +96,16 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     }
     frame.render_widget(Paragraph::new(key_lines), cols[1]);
 
-    // Most-errored bigrams on one centered line.
-    let errored = hm.most_errored_bigrams(5);
+    // Most-errored bigrams on one centered line (frozen at session end).
     let mut bigram_spans = vec![Span::styled("Most-errored: ", muted)];
-    if errored.is_empty() {
+    if insights.most_errored.is_empty() {
         bigram_spans.push(Span::styled("none — clean run!", value));
     } else {
-        for (i, (b, errors, hits)) in errored.iter().enumerate() {
+        for (i, (b, errors, hits)) in insights.most_errored.iter().enumerate() {
             if i > 0 {
                 bigram_spans.push(Span::styled("   ", muted));
             }
             bigram_spans.push(Span::styled(format!("{b} "), value));
-            // Show errors/hits so one-off 100% misses aren't misleading.
             bigram_spans.push(Span::styled(format!("{errors}/{hits}"), muted));
         }
     }

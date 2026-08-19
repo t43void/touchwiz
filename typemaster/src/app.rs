@@ -10,6 +10,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use engine::curriculum::{self, Curriculum, Lesson, LessonProgress, Outcome};
+use engine::heatmap::Heatmap;
 use engine::metrics::CHARS_PER_WORD;
 use engine::session::{Session, SessionState};
 
@@ -68,6 +69,15 @@ pub fn now_ms() -> u64 {
         .unwrap_or(0)
 }
 
+/// Cached post-session analytics so the results screen stays stable.
+#[derive(Debug, Clone, Default)]
+pub struct SessionInsights {
+    /// Slowest keys: `(char, avg_latency_ms)`.
+    pub slowest_keys: Vec<(char, f64)>,
+    /// Most-errored bigrams: `(bigram, errors, hits)`.
+    pub most_errored: Vec<(String, u32, u32)>,
+}
+
 /// Application state.
 pub struct App {
     curriculum: Curriculum,
@@ -91,6 +101,8 @@ pub struct App {
     menu_idx: usize,
     has_session: bool,
     last_outcome: Option<Outcome>,
+    /// Frozen when a session finishes; avoids HashMap-order flicker on results.
+    insights: SessionInsights,
     frame: u64,
     stats: DashboardStats,
     history: Vec<f64>,
@@ -123,6 +135,7 @@ impl App {
             menu_idx: 0,
             has_session: false,
             last_outcome: None,
+            insights: SessionInsights::default(),
             frame: 0,
             stats: DashboardStats::default(),
             history: Vec::new(),
@@ -240,6 +253,11 @@ impl App {
         self.has_session
     }
 
+    /// Frozen analytics from the last finished session (stable across frames).
+    pub fn insights(&self) -> &SessionInsights {
+        &self.insights
+    }
+
     /// Best net WPM recorded for the active lesson, if any (drives the ghost).
     pub fn best_wpm_current(&self) -> f64 {
         self.progress
@@ -274,6 +292,7 @@ impl App {
         self.progress.clear();
         self.has_session = false;
         self.last_outcome = None;
+        self.insights = SessionInsights::default();
         self.history.clear();
         self.leaderboard.clear();
         self.stats = DashboardStats::default();
@@ -407,6 +426,11 @@ impl App {
         } else {
             self.last_outcome = None;
         }
+        let hm = Heatmap::from_session(&self.session);
+        self.insights = SessionInsights {
+            slowest_keys: hm.slowest_keys(5),
+            most_errored: hm.most_errored_bigrams(5),
+        };
         self.has_session = true;
         self.screen = Screen::Results;
     }

@@ -144,7 +144,10 @@ impl Heatmap {
             .iter()
             .map(|(&k, s)| (k, s.avg_latency_ms()))
             .collect();
-        v.sort_by(|a, b| b.1.total_cmp(&a.1));
+        v.sort_by(|a, b| {
+            b.1.total_cmp(&a.1)
+                .then_with(|| a.0.cmp(&b.0)) // stable across HashMap rebuilds
+        });
         v.truncate(n);
         v
     }
@@ -163,6 +166,7 @@ impl Heatmap {
             b.1.cmp(&a.1) // more errors first
                 .then_with(|| b.3.total_cmp(&a.3)) // then higher rate
                 .then_with(|| b.2.cmp(&a.2)) // then more samples
+                .then_with(|| a.0.cmp(&b.0)) // lexicographic — no frame flicker
         });
         v.truncate(n);
         v.into_iter().map(|(b, e, h, _)| (b, e, h)).collect()
