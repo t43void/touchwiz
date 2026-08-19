@@ -141,9 +141,10 @@ fn run(
                 }
                 // Emit a terminal bell for an error keystroke when audio is on.
                 if app.take_bell() {
-                    let mut out = io::stdout();
-                    let _ = out.write_all(b"\x07");
-                    let _ = out.flush();
+                    // BEL to both stdout and stderr — some terminals only hear one.
+                    let _ = execute!(io::stdout(), crossterm::style::Print("\x07"));
+                    let _ = io::stderr().write_all(b"\x07");
+                    let _ = io::stderr().flush();
                 }
             }
         }

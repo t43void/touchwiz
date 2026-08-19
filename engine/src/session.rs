@@ -45,6 +45,8 @@ pub struct Session {
     target: Vec<String>,
     cursor: usize,
     keystrokes: Vec<Keystroke>,
+    /// Incorrect attempts that did not advance the cursor (stay-on-error).
+    misses: Vec<Keystroke>,
     finger_counts: [u32; 10],
     errors: u32,
     start_ms: Option<u64>,
@@ -66,6 +68,7 @@ impl Session {
             target,
             cursor: 0,
             keystrokes: Vec::new(),
+            misses: Vec::new(),
             finger_counts: [0; 10],
             errors: 0,
             start_ms: None,
@@ -97,9 +100,14 @@ impl Session {
         self.target.len()
     }
 
-    /// All recorded keystrokes in order.
+    /// All recorded keystrokes in order (successful advances only).
     pub fn keystrokes(&self) -> &[Keystroke] {
         &self.keystrokes
+    }
+
+    /// Incorrect attempts that did not advance the cursor.
+    pub fn misses(&self) -> &[Keystroke] {
+        &self.misses
     }
 
     /// Number of incorrect keystrokes recorded so far.
@@ -142,9 +150,12 @@ impl Session {
         Ok(())
     }
 
-    /// Records a typed grapheme against the current cursor position and advances
-    /// the cursor. Errors if the session is not active. Returns whether the
-    /// keystroke was correct. Keystrokes past the end of the target are ignored.
+    /// Records a typed grapheme against the current cursor position.
+    ///
+    /// On a match the cursor advances. On a miss the error is counted and the
+    /// cursor stays put (stay-on-error) so one wrong key cannot cascade.
+    /// Returns whether the keystroke was correct. Keystrokes past the end of
+    /// the target are ignored.
     pub fn record(&mut self, typed: &str, now_ms: u64) -> Result<bool> {
         if self.state != SessionState::Active {
             return Err(Error::InvalidTransition("record requires Active"));
@@ -156,22 +167,34 @@ impl Session {
         let correct = typed == expected;
         let finger = expected.chars().next().and_then(metrics::finger_for);
 
-        if !correct {
-            self.errors += 1;
-        }
-        if let Some(f) = finger {
-            self.finger_counts[f.index()] += 1;
-        }
         if let Some(prev) = self.last_press_ms {
             self.inter_key_intervals_ms
                 .push(now_ms.saturating_sub(prev) as f64);
         }
         self.last_press_ms = Some(now_ms);
 
+        if !correct {
+            self.errors += 1;
+            if let Some(f) = finger {
+                self.finger_counts[f.index()] += 1;
+            }
+            self.misses.push(Keystroke {
+                typed: typed.to_string(),
+                expected,
+                correct: false,
+                press_ms: now_ms,
+                finger,
+            });
+            return Ok(false);
+        }
+
+        if let Some(f) = finger {
+            self.finger_counts[f.index()] += 1;
+        }
         self.keystrokes.push(Keystroke {
             typed: typed.to_string(),
             expected,
-            correct,
+            correct: true,
             press_ms: now_ms,
             finger,
         });
@@ -180,7 +203,7 @@ impl Session {
         if self.cursor >= self.target.len() {
             self.finish_internal(now_ms);
         }
-        Ok(correct)
+        Ok(true)
     }
 
     /// Marks the session finished. Idempotent once finished.
@@ -215,9 +238,9 @@ impl Session {
         self.elapsed_ms(now_ms) as f64 / 1000.0
     }
 
-    /// Total keystrokes recorded.
+    /// Total keystrokes recorded (advances + misses).
     pub fn total_keystrokes(&self) -> u32 {
-        self.keystrokes.len() as u32
+        (self.keystrokes.len() + self.misses.len()) as u32
     }
 
     /// Number of fully-correct 5-character words, used for adjusted WPM.
@@ -388,10 +411,14 @@ mod tests {
         let mut s = Session::new("fj");
         s.start(0).unwrap();
         assert!(s.record("f", 100).unwrap());
-        assert!(!s.record("x", 200).unwrap()); // wrong key
+        assert!(!s.record("x", 200).unwrap()); // wrong key — stay put
+        assert_eq!(s.cursor(), 1);
         assert_eq!(s.error_count(), 1);
         assert_eq!(s.total_keystrokes(), 2);
-        assert_eq!(s.accuracy(), 50.0);
+        assert!(s.record("j", 300).unwrap());
+        // 2 correct advances + 1 miss => 66.7% accuracy
+        assert!((s.accuracy() - 66.666).abs() < 0.01);
+        assert_eq!(s.state(), SessionState::Finished);
     }
 
     #[test]
@@ -421,16 +448,19 @@ mod tests {
         let mut s = Session::new("ab cd");
         s.start(0).unwrap();
         s.record("a", 100).unwrap();
-        s.record("x", 200).unwrap(); // wrong: expected 'b'
+        assert!(!s.record("x", 200).unwrap()); // wrong: expected 'b', cursor stays
+        s.record("b", 250).unwrap();
         s.record(" ", 300).unwrap();
         s.record("c", 400).unwrap();
         s.record("d", 500).unwrap();
         let stats = s.word_stats();
         assert_eq!(stats.len(), 2);
         assert_eq!(stats[0].word, "ab");
-        assert_eq!(stats[0].error_rate, 0.5);
+        // Misses don't sit on word positions; word_stats only sees advances.
+        assert_eq!(stats[0].error_rate, 0.0);
         assert_eq!(stats[1].word, "cd");
         assert_eq!(stats[1].error_rate, 0.0);
+        assert_eq!(s.error_count(), 1);
     }
 
     #[test]

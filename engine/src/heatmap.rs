@@ -85,17 +85,30 @@ impl Heatmap {
         let mut hm = Heatmap::new();
         let mut prev_press: Option<u64> = None;
         let mut prev_char: Option<char> = None;
-        for k in session.keystrokes() {
+
+        // Interleave advances and misses by press time so latency stays sane.
+        let mut events: Vec<&crate::session::Keystroke> = session
+            .keystrokes()
+            .iter()
+            .chain(session.misses().iter())
+            .collect();
+        events.sort_by_key(|k| k.press_ms);
+
+        for k in events {
             let latency = match prev_press {
                 Some(p) => k.press_ms.saturating_sub(p) as f64,
                 None => 0.0,
             };
             if let Some(c) = k.expected.chars().next() {
                 hm.record_key(c, k.correct, latency);
-                if let Some(pc) = prev_char {
-                    hm.record_bigram(&format!("{pc}{c}"), k.correct, latency);
+                if k.correct {
+                    if let Some(pc) = prev_char {
+                        hm.record_bigram(&format!("{pc}{c}"), true, latency);
+                    }
+                    prev_char = Some(c);
+                } else if let Some(pc) = prev_char {
+                    hm.record_bigram(&format!("{pc}{c}"), false, latency);
                 }
-                prev_char = Some(c);
             }
             prev_press = Some(k.press_ms);
         }

@@ -85,6 +85,8 @@ pub struct App {
     show_ghost: bool,
     audio_enabled: bool,
     pending_bell: bool,
+    /// Settings: first Ctrl+X arms reset; second confirms.
+    reset_armed: bool,
     show_help: bool,
     menu_idx: usize,
     has_session: bool,
@@ -116,6 +118,7 @@ impl App {
             show_ghost: false,
             audio_enabled: false,
             pending_bell: false,
+            reset_armed: false,
             show_help: false,
             menu_idx: 0,
             has_session: false,
@@ -257,7 +260,28 @@ impl App {
         }
         let minutes = self.session.elapsed_ms(now_ms) as f64 / 60_000.0;
         let chars = (best * CHARS_PER_WORD * minutes).round() as usize;
-        Some(chars.min(self.session.total_chars()))
+        let last = self.session.total_chars().saturating_sub(1);
+        Some(chars.min(last))
+    }
+
+    /// Whether a reset-progress confirmation is armed.
+    pub fn reset_armed(&self) -> bool {
+        self.reset_armed
+    }
+
+    /// Clears in-memory progress and queues a full DB wipe when `db` is set.
+    pub fn reset_progress(&mut self, db: Option<&Db>, now_ms: u64) {
+        self.progress.clear();
+        self.has_session = false;
+        self.last_outcome = None;
+        self.history.clear();
+        self.leaderboard.clear();
+        self.stats = DashboardStats::default();
+        self.reset_armed = false;
+        if let Some(db) = db {
+            db.reset_all();
+        }
+        self.refresh_dashboard(db, now_ms);
     }
 
     /// Takes the pending error-bell flag, if set (the caller emits the bell).
@@ -473,6 +497,10 @@ impl App {
                 self.show_ghost = !self.show_ghost;
                 KeyOutcome::None
             }
+            KeyCode::Char('m') if ctrl => {
+                self.audio_enabled = !self.audio_enabled;
+                KeyOutcome::None
+            }
             KeyCode::Char(c) if !ctrl => {
                 if self.session.state() == SessionState::Idle {
                     let _ = self.session.start(now_ms);
@@ -509,6 +537,7 @@ impl App {
                 if self.screen == Screen::Dashboard {
                     KeyOutcome::Quit
                 } else {
+                    self.reset_armed = false;
                     self.refresh_dashboard(db, now_ms);
                     self.screen = Screen::Dashboard;
                     KeyOutcome::None
@@ -540,6 +569,16 @@ impl App {
             }
             KeyCode::Char('m') => {
                 self.audio_enabled = !self.audio_enabled;
+                KeyOutcome::None
+            }
+            KeyCode::Char('x') if ctrl => {
+                if self.screen == Screen::Settings {
+                    if self.reset_armed {
+                        self.reset_progress(db, now_ms);
+                    } else {
+                        self.reset_armed = true;
+                    }
+                }
                 KeyOutcome::None
             }
             KeyCode::Down | KeyCode::Tab => {
@@ -749,12 +788,38 @@ mod tests {
         app.on_key(ch('m'), 0, None); // enable audio (command mode)
         assert!(app.audio_enabled());
         app.start_lesson(0);
-        // Type a guaranteed-wrong key to trigger the bell.
+        // Ctrl+M also toggles while typing.
+        app.on_key(ctrl('m'), 0, None);
+        assert!(!app.audio_enabled());
+        app.on_key(ctrl('m'), 0, None);
+        assert!(app.audio_enabled());
+        // Type a guaranteed-wrong key to trigger the bell; cursor stays put.
         let first = app.session().target()[0].chars().next().unwrap();
         let wrong = if first == 'z' { 'a' } else { 'z' };
         app.on_key(ch(wrong), 100, None);
+        assert_eq!(app.session().cursor(), 0);
         assert!(app.take_bell());
         assert!(!app.take_bell()); // taken once
+    }
+
+    #[test]
+    fn reset_progress_requires_double_ctrl_x() {
+        let mut app = App::new().unwrap();
+        app.progress.insert(
+            "1.1".into(),
+            LessonProgress {
+                consecutive_passes: 2,
+                best_net_wpm: 40.0,
+                completed: false,
+            },
+        );
+        app.screen = Screen::Settings;
+        app.on_key(ctrl('x'), 0, None);
+        assert!(app.reset_armed());
+        assert!(!app.progress().is_empty());
+        app.on_key(ctrl('x'), 0, None);
+        assert!(!app.reset_armed());
+        assert!(app.progress().is_empty());
     }
 
     #[test]

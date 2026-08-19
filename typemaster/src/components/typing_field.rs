@@ -11,11 +11,11 @@ use crate::themes::Theme;
 
 /// Builds the typing-field paragraph for the current session state.
 ///
-/// - Completed characters are emerald (dimmed) if they were typed correctly,
-///   or red if they were typed incorrectly.
+/// - Completed characters are emerald (dimmed); the engine stays on error so
+///   completed positions are always correct advances.
 /// - The current character carries a block cursor (cyan background).
 /// - Upcoming characters are muted.
-/// - When `ghost` is `Some(i)`, the character at `i` is marked (gold underline)
+/// - When `ghost` is `Some(i)`, that character is marked (gold underline)
 ///   to show where a run at your best pace would be — race the ghost.
 ///
 /// `blink_on` toggles the cursor visibility so the caller can animate it across
@@ -27,12 +27,10 @@ pub fn typing_paragraph<'a>(
     ghost: Option<usize>,
 ) -> Paragraph<'a> {
     let cursor = session.cursor();
-    let keystrokes = session.keystrokes();
 
     let completed = Style::default()
         .fg(theme.accent_emerald)
         .add_modifier(Modifier::DIM);
-    let error = Style::default().fg(theme.error_red);
     let upcoming = Style::default().fg(theme.text_muted);
     let cursor_on = Style::default().fg(theme.background).bg(theme.accent_cyan);
     let cursor_off = Style::default()
@@ -44,18 +42,23 @@ pub fn typing_paragraph<'a>(
 
     let mut spans: Vec<Span> = Vec::with_capacity(session.total_chars());
     for (i, grapheme) in session.target().iter().enumerate() {
+        let at_ghost = ghost == Some(i);
         let style = if i < cursor {
-            match keystrokes.get(i) {
-                Some(k) if k.correct => completed,
-                _ => error,
+            // Advances are always correct under stay-on-error; still mark ghost trail.
+            if at_ghost {
+                ghost_style
+            } else {
+                completed
             }
         } else if i == cursor {
             if blink_on {
                 cursor_on
+            } else if at_ghost {
+                ghost_style
             } else {
                 cursor_off
             }
-        } else if ghost == Some(i) {
+        } else if at_ghost {
             ghost_style
         } else {
             upcoming

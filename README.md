@@ -39,7 +39,8 @@ cargo build --release
 | `Ctrl+R` | restart |
 | `Ctrl+T` | cycle theme |
 | `g` | ghost racer |
-| `m` | audio toggle |
+| `m` / `Ctrl+M` | audio toggle |
+| `Ctrl+X` | reset progress (settings, twice) |
 | `?` | help |
 | `Ctrl+C` | quit |
 

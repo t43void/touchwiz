@@ -191,6 +191,8 @@ enum Command {
     Session(Box<SessionRecord>),
     /// Upsert a lesson's progress.
     Progress(ProgressRecord),
+    /// Wipe all persisted tables.
+    ResetAll,
 }
 
 /// Handle to the background database writer plus a read connection.
@@ -223,6 +225,7 @@ impl Db {
                 let result = match cmd {
                     Command::Session(rec) => save_record(&mut conn, &rec),
                     Command::Progress(rec) => save_progress(&conn, &rec),
+                    Command::ResetAll => reset_all(&conn),
                 };
                 if let Err(e) = result {
                     // The render thread is gone by design; surface to stderr.
@@ -241,6 +244,11 @@ impl Db {
     /// Queues a lesson-progress upsert. Non-blocking.
     pub fn save_progress(&self, record: ProgressRecord) {
         let _ = self.tx.send(Command::Progress(record));
+    }
+
+    /// Queues a full wipe of sessions, progress, stats, and personal bests.
+    pub fn reset_all(&self) {
+        let _ = self.tx.send(Command::ResetAll);
     }
 
     /// Loads all stored lesson progress as `(lesson_id, (passes, best, completed))`.
@@ -446,6 +454,22 @@ fn save_progress(conn: &Connection, rec: &ProgressRecord) -> rusqlite::Result<()
             rec.best_net_wpm,
             i64::from(rec.completed),
         ],
+    )?;
+    Ok(())
+}
+
+/// Deletes all user data tables (progress, sessions, stats, PBs, streaks).
+fn reset_all(conn: &Connection) -> rusqlite::Result<()> {
+    conn.execute_batch(
+        "
+        DELETE FROM key_stats;
+        DELETE FROM bigram_stats;
+        DELETE FROM word_mastery;
+        DELETE FROM personal_bests;
+        DELETE FROM streaks;
+        DELETE FROM sessions;
+        DELETE FROM lesson_progress;
+        ",
     )?;
     Ok(())
 }

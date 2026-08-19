@@ -455,11 +455,11 @@ pub fn evaluate(
     );
     if passed {
         entry.consecutive_passes += 1;
+        if net_wpm > entry.best_net_wpm {
+            entry.best_net_wpm = net_wpm;
+        }
     } else {
         entry.consecutive_passes = 0;
-    }
-    if net_wpm > entry.best_net_wpm {
-        entry.best_net_wpm = net_wpm;
     }
     if adaptive::is_unlocked(entry.consecutive_passes) {
         entry.completed = true;

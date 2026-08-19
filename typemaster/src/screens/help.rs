@@ -10,7 +10,7 @@ use crate::app::App;
 use crate::screens::{centered, panel};
 
 /// Keybinding rows: (keys, description).
-const BINDINGS: [(&str, &str); 14] = [
+const BINDINGS: [(&str, &str); 15] = [
     ("type", "begin / enter characters"),
     ("Esc / q", "back (quit from dashboard)"),
     ("Enter", "confirm / select / start"),
@@ -23,7 +23,8 @@ const BINDINGS: [(&str, &str); 14] = [
     ("k / Ctrl+K", "toggle keyboard view"),
     ("f / Ctrl+F", "toggle finger guide"),
     ("g / Ctrl+G", "toggle ghost racer"),
-    ("m", "toggle audio feedback"),
+    ("m / Ctrl+M", "toggle audio feedback"),
+    ("Ctrl+X", "reset progress (settings, twice)"),
     ("?", "toggle this help"),
 ];
 
