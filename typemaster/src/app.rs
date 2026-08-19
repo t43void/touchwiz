@@ -85,8 +85,6 @@ pub struct App {
     show_ghost: bool,
     audio_enabled: bool,
     pending_bell: bool,
-    /// Frames remaining to flash the current key red after a miss.
-    miss_flash_frames: u8,
     /// Settings: first Ctrl+X arms reset; second confirms.
     reset_armed: bool,
     show_help: bool,
