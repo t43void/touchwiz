@@ -44,7 +44,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App, now_ms: u64, blink_on: b
     idx += 1;
     let ghost = app.ghost_index(now_ms);
     frame.render_widget(
-        typing_paragraph(session, theme, blink_on, ghost),
+        typing_paragraph(session, theme, blink_on, ghost, app.miss_flash()),
         chunks[idx],
     );
     idx += 1;

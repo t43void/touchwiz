@@ -85,6 +85,8 @@ pub struct App {
     show_ghost: bool,
     audio_enabled: bool,
     pending_bell: bool,
+    /// Frames remaining to flash the current key red after a miss.
+    miss_flash_frames: u8,
     /// Settings: first Ctrl+X arms reset; second confirms.
     reset_armed: bool,
     show_help: bool,
@@ -118,6 +120,7 @@ impl App {
             show_ghost: false,
             audio_enabled: false,
             pending_bell: false,
+            miss_flash_frames: 0,
             reset_armed: false,
             show_help: false,
             menu_idx: 0,
@@ -289,9 +292,17 @@ impl App {
         std::mem::take(&mut self.pending_bell)
     }
 
+    /// Whether the current key should flash red (recent miss).
+    pub fn miss_flash(&self) -> bool {
+        self.miss_flash_frames > 0
+    }
+
     /// Advances the frame counter; auto-dismisses the splash after a delay.
     pub fn tick(&mut self) {
         self.frame = self.frame.wrapping_add(1);
+        if self.miss_flash_frames > 0 {
+            self.miss_flash_frames -= 1;
+        }
         if self.screen == Screen::Splash && self.frame > SPLASH_FRAMES {
             self.screen = Screen::Dashboard;
         }
@@ -507,8 +518,14 @@ impl App {
                 }
                 let was_active = self.session.state() == SessionState::Active;
                 let correct = self.session.record(&c.to_string(), now_ms).unwrap_or(true);
-                if !correct && self.audio_enabled {
-                    self.pending_bell = true;
+                if correct {
+                    self.miss_flash_frames = 0;
+                } else {
+                    // ~200ms red flash on the current character so misses are visible.
+                    self.miss_flash_frames = 12;
+                    if self.audio_enabled {
+                        self.pending_bell = true;
+                    }
                 }
                 if was_active && self.session.state() == SessionState::Finished {
                     self.finish_session(now_ms);
@@ -798,6 +815,7 @@ mod tests {
         let wrong = if first == 'z' { 'a' } else { 'z' };
         app.on_key(ch(wrong), 100, None);
         assert_eq!(app.session().cursor(), 0);
+        assert!(app.miss_flash());
         assert!(app.take_bell());
         assert!(!app.take_bell()); // taken once
     }
