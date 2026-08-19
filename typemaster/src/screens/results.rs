@@ -1,7 +1,6 @@
 //! Post-session results: a centered, framed two-column breakdown.
 
 use engine::adaptive::PASSES_TO_UNLOCK;
-use engine::heatmap::Heatmap;
 use ratatui::layout::{Constraint, Direction, HorizontalAlignment, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
