@@ -145,8 +145,7 @@ impl Heatmap {
             .map(|(&k, s)| (k, s.avg_latency_ms()))
             .collect();
         v.sort_by(|a, b| {
-            b.1.total_cmp(&a.1)
-                .then_with(|| a.0.cmp(&b.0)) // stable across HashMap rebuilds
+            b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)) // stable across HashMap rebuilds
         });
         v.truncate(n);
         v
