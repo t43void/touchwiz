@@ -23,7 +23,7 @@ cargo build --release
 
 ## What you get
 
-- Full 0→300 WPM curriculum (24 lessons, gated progression)
+- Full 0→300 WPM curriculum (28 lessons, gated progression)
 - Live metrics: net/raw WPM, accuracy, consistency
 - Keyboard heatmap, finger guide, ghost racer
 - Themes, optional audio, custom file import (`--file`)
